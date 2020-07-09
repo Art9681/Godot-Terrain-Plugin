@@ -1,0 +1,87 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial;
+//render_mode unshaded;
+
+uniform int octaves : hint_range(0, 9);
+uniform float domain_warping_x : hint_range(0.0, 9.0);
+uniform float domain_warping_y : hint_range(0.0, 9.0);
+uniform float noise_zoom_level : hint_range(1.0, 10.0);
+
+float hash(vec2 p) {
+  return fract(sin(dot(p * 17.17, vec2(14.91, 67.31))) * 4791.9511);
+}
+
+float noise(vec2 x) {
+  vec2 p = floor(x);
+  vec2 f = fract(x);
+  f = f * f * (3.0 - 2.0 * f);
+  vec2 a = vec2(1.0, 0.0);
+  return mix(mix(hash(p + a.yy), hash(p + a.xy), f.x),
+         mix(hash(p + a.yx), hash(p + a.xx), f.x), f.y);
+}
+
+float fbm(vec2 x) {
+  float height = 0.0;
+  float amplitude = 0.9;
+  float frequency = 1.0;
+  for (int i = 0; i < octaves; i++){
+    height += noise(x * frequency) * amplitude;
+    amplitude *= 0.5;
+    frequency *= 2.0;
+  }
+  return height;
+}
+
+float domain_warp(in vec2 p)
+{
+    vec2 q = vec2(fbm(p + vec2(0.0,0.0)),
+                  fbm(p + vec2(domain_warping_x,domain_warping_y)));
+
+    return fbm( p + 4.0*q );
+}
+
+float ridge_noise(in vec2 x) {
+	float height = 2.0 * (0.5 - abs(0.5 - noise(x)));
+	return height;
+}
+
+float noise_blend(vec2 point) {
+	//float height = fbm(point * 1.0) + ridge_noise(point * 1.0) + domain_warp(point * 1.0);
+	float height = -fbm(point * 1.0) + ridge_noise(point * 1.0) + domain_warp(point * 1.0);
+	return height * 1.0;
+}
+
+void vertex() {
+  //float height = fbm(VERTEX.xz * 4.0);
+  //float height = domain_warp(VERTEX.xz * 1.0);
+  //float height = ridge_noise(VERTEX.xz * 1.0);
+  //float height = ridge_noise(VERTEX.xz * 1.0) + domain_warp(VERTEX.xz * 1.0);
+  float height = noise_blend(UV.xy * noise_zoom_level);
+  VERTEX.y += height * 0.5;
+  
+  //Calculate normals
+  vec2 e = vec2(0.009, 0.0);
+  //vec3 normal = normalize(vec3(fbm(VERTEX.xz - e) - fbm(VERTEX.xz + e), 2.0 * e.x, fbm(VERTEX.xz - e.yx) - fbm(VERTEX.xz + e.yx)));
+  //vec3 normal = normalize(vec3(domain_warp(VERTEX.xz - e) - domain_warp(VERTEX.xz + e), 2.0 * e.x, domain_warp(VERTEX.xz - e.yx) - domain_warp(VERTEX.xz + e.yx)));
+  //vec3 normal = normalize(vec3(noise_blend(VERTEX.xz - e) - noise_blend(VERTEX.xz + e), 2.0 * e.x, noise_blend(VERTEX.xz - e.yx) - noise_blend(VERTEX.xz + e.yx)));
+  //vec3 normal = normalize(vec3((noise_blend(VERTEX.xz - e) * noise_zoom_level) - (noise_blend(VERTEX.xz + e) * noise_zoom_level), 1.0 * e.x, (noise_blend(VERTEX.xz - e.yx) * noise_zoom_level) - (noise_blend(VERTEX.xz + e.yx) * noise_zoom_level)));
+  //NORMAL = normal;
+
+  //Set color to vertex height
+  COLOR.xyz = vec3(height, height, height);
+}
+
+void fragment() {
+    ALBEDO = COLOR.xyz;
+	//ALBEDO = vec3(1.0, 1.0, 1.0);
+}
+"
+
+[resource]
+shader = SubResource( 1 )
+shader_param/octaves = 8.0
+shader_param/domain_warping_x = 4.5
+shader_param/domain_warping_y = 1.4
+shader_param/noise_zoom_level = 4.8

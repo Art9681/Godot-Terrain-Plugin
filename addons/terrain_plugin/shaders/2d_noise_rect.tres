@@ -1,0 +1,78 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+uniform int octaves : hint_range(0, 9);
+uniform float domain_warping_x : hint_range(0.0, 9.0);
+uniform float domain_warping_y : hint_range(0.0, 9.0);
+uniform float noise_zoom_level : hint_range(1.0, 10.0);
+
+//The first function we use to generate the noise is the hash function. It gives the random height for each of the hill tops.
+float hash(vec2 p) {
+  return fract(sin(dot(p * 17.17, vec2(14.91, 67.31))) * 4791.9511);
+}
+
+//Next we define the noise function. It smoothly interpolates between the random heights.
+float noise(vec2 x) {
+  vec2 p = floor(x);
+  vec2 f = fract(x);
+  f = f * f * (3.0 - 2.0 * f);
+  vec2 a = vec2(1.0, 0.0);
+  return mix(mix(hash(p + a.yy), hash(p + a.xy), f.x),
+         mix(hash(p + a.yx), hash(p + a.xx), f.x), f.y);
+}
+
+float fbm(vec2 x) {
+  float height = 0.0;
+  float amplitude = 0.9;
+  float frequency = 1.0;
+  for (int i = 0; i < octaves; i++){
+    height += noise(x * frequency) * amplitude;
+    amplitude *= 0.5;
+    frequency *= 2.0;
+  }
+  return height;
+}
+
+float domain_warp(in vec2 p)
+{
+    vec2 q = vec2(fbm(p + vec2(0.0,0.0)),
+                  fbm(p + vec2(domain_warping_x,domain_warping_y)));
+
+    return fbm( p + 4.0*q );
+}
+
+float ridge_noise(in vec2 x) {
+	float height = 2.0 * (0.5 - abs(0.5 - noise(x)));
+	return height;
+}
+
+float noise_blend(vec2 point) {
+	//float height = fbm(point * 1.0) + ridge_noise(point * 1.0) + domain_warp(point * 1.0);
+	float height = -fbm(point * 1.0) + ridge_noise(point * 1.0) + domain_warp(point * 1.0);
+	return height * 1.0;
+}
+
+/////////////
+void fragment(){
+	vec2 st = UV.xy;
+	
+	// Scale the coordinate system to see
+    // some noise in action
+    //vec2 pos = vec2(st * 100.0);
+	
+	vec3 color = vec3(0.0);
+	//color += ridge_noise(st * noise_zoom_level);
+	color += noise_blend(st * noise_zoom_level);
+	
+	//COLOR = vec4(st.x, st.y, 0.0, 1.0);
+	COLOR = vec4(color, 1.0);
+}"
+
+[resource]
+shader = SubResource( 1 )
+shader_param/octaves = 6.0
+shader_param/domain_warping_x = 4.5
+shader_param/domain_warping_y = 1.4
+shader_param/noise_zoom_level = 5.7

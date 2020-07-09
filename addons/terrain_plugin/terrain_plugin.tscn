@@ -1,0 +1,127 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://addons/terrain_plugin/create_terrain_button.gd" type="Script" id=1]
+[ext_resource path="res://addons/terrain_plugin/debug_button.gd" type="Script" id=2]
+[ext_resource path="res://addons/terrain_plugin/shaders/2d_noise_rect.tres" type="Material" id=3]
+[ext_resource path="res://addons/terrain_plugin/container.gd" type="Script" id=4]
+
+[node name="Artlabs GPU Terrain" type="VBoxContainer"]
+margin_right = 140.0
+margin_bottom = 436.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="OctaveLabel" type="Label" parent="."]
+margin_right = 140.0
+margin_bottom = 14.0
+text = "Octaves"
+align = 1
+
+[node name="OctaveSlider" type="HSlider" parent="."]
+margin_top = 18.0
+margin_right = 140.0
+margin_bottom = 34.0
+max_value = 9.0
+tick_count = 10
+ticks_on_borders = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DW_X_Label" type="Label" parent="."]
+margin_top = 38.0
+margin_right = 140.0
+margin_bottom = 52.0
+text = "Domain Warping X"
+align = 1
+
+[node name="DW_X_Slider" type="HSlider" parent="."]
+margin_top = 56.0
+margin_right = 140.0
+margin_bottom = 72.0
+max_value = 9.0
+step = 0.1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DW_Y_Label" type="Label" parent="."]
+margin_top = 76.0
+margin_right = 140.0
+margin_bottom = 90.0
+text = "Domain Warping Y"
+align = 1
+
+[node name="DW_Y_Slider" type="HSlider" parent="."]
+margin_top = 94.0
+margin_right = 140.0
+margin_bottom = 110.0
+max_value = 9.0
+step = 0.1
+
+[node name="TerrainButton" type="Button" parent="."]
+margin_top = 114.0
+margin_right = 140.0
+margin_bottom = 134.0
+size_flags_vertical = 0
+text = "Create Terrain"
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DebugButton" type="Button" parent="."]
+margin_top = 138.0
+margin_right = 140.0
+margin_bottom = 158.0
+size_flags_vertical = 0
+text = "Debug"
+expand_icon = true
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HSeparator" type="HSeparator" parent="."]
+margin_top = 162.0
+margin_right = 140.0
+margin_bottom = 166.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Zoom_Label" type="Label" parent="."]
+margin_top = 170.0
+margin_right = 140.0
+margin_bottom = 184.0
+text = "Noise Zoom Level"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Zoom_Slider" type="HSlider" parent="."]
+margin_top = 188.0
+margin_right = 140.0
+margin_bottom = 204.0
+step = 0.1
+value = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+material = ExtResource( 3 )
+margin_top = 208.0
+margin_right = 140.0
+margin_bottom = 436.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+[connection signal="value_changed" from="OctaveSlider" to="." method="_on_OctaveSlider_value_changed"]
+[connection signal="value_changed" from="DW_X_Slider" to="." method="_on_DW_X_Slider_value_changed"]
+[connection signal="value_changed" from="DW_Y_Slider" to="." method="_on_DW_Y_Slider_value_changed"]
+[connection signal="value_changed" from="Zoom_Slider" to="." method="_on_Zoom_Slider_value_changed"]
