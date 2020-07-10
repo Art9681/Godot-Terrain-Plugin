@@ -3,14 +3,14 @@
 [sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
 
+uniform float noise_seed;
 uniform int octaves : hint_range(0, 9);
 uniform float domain_warping_x : hint_range(0.0, 9.0);
 uniform float domain_warping_y : hint_range(0.0, 9.0);
 uniform float noise_zoom_level : hint_range(1.0, 10.0);
 
-//The first function we use to generate the noise is the hash function. It gives the random height for each of the hill tops.
 float hash(vec2 p) {
-  return fract(sin(dot(p * 17.17, vec2(14.91, 67.31))) * 4791.9511);
+  return fract(sin(dot(p * noise_seed, vec2(14.91, 67.31))) * 4791.9511);
 }
 
 //Next we define the noise function. It smoothly interpolates between the random heights.
@@ -72,7 +72,8 @@ void fragment(){
 
 [resource]
 shader = SubResource( 1 )
-shader_param/octaves = 6.0
-shader_param/domain_warping_x = 4.5
-shader_param/domain_warping_y = 1.4
-shader_param/noise_zoom_level = 5.7
+shader_param/noise_seed = 858
+shader_param/octaves = 4.0
+shader_param/domain_warping_x = 3.2
+shader_param/domain_warping_y = 1.6
+shader_param/noise_zoom_level = 3.3
